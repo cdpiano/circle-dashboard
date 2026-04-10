@@ -46,18 +46,20 @@ export default function Home() {
             <StablecoinCompetition />
           </GridCard>
 
-          {/* Row 4: Reserve vs Rate (3x1) + CPN (1x1) + OnChain (1x1) + DeFi (1x1) */}
+          {/* Row 4: DeFi TVL (3x1) + Reserve vs Rate (3x1) */}
+          <GridCard colSpan={3} rowSpan={1}>
+            <DefiDistribution />
+          </GridCard>
           <GridCard colSpan={3} rowSpan={1}>
             <ReserveVsRate />
           </GridCard>
+
+          {/* Row 5: CPN (1x1) + OnChain (1x1) */}
           <GridCard colSpan={1} rowSpan={1}>
             <CpnVolume />
           </GridCard>
           <GridCard colSpan={1} rowSpan={1}>
             <OnchainVolume />
-          </GridCard>
-          <GridCard colSpan={1} rowSpan={1}>
-            <DefiDistribution />
           </GridCard>
         </DashboardGrid>
       </main>

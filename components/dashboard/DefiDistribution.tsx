@@ -1,19 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Layers } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
-interface Protocol {
+const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EC4899', '#8B5CF6'];
+
+interface ProtocolInfo {
   name: string;
-  usdcAmount: number;
+  tvl: number;
   share: number;
 }
 
-const COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#6B7280'];
-
 export default function DefiDistribution() {
-  const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
+  const [protocols, setProtocols] = useState<ProtocolInfo[]>([]);
   const [totalTvl, setTotalTvl] = useState(0);
 
   useEffect(() => {
@@ -21,62 +23,85 @@ export default function DefiDistribution() {
       try {
         const res = await fetch('/api/defi');
         const json = await res.json();
-        const prots = json.protocols || json.data?.protocols || [];
-        if (prots.length > 0) {
-          const mapped = prots.map((p: any) => ({
-            name: p.name || p.protocol,
-            usdcAmount: p.usdcAmount || 0,
-            share: p.share || 0,
-          }));
-          const sorted = mapped.sort((a: Protocol, b: Protocol) => b.usdcAmount - a.usdcAmount).slice(0, 5);
-          setProtocols(sorted);
-          setTotalTvl(mapped.reduce((s: number, p: Protocol) => s + p.usdcAmount, 0));
-        }
-      } catch {
-        const mock: Protocol[] = [
-          { name: 'Aave', usdcAmount: 4_200_000_000, share: 35 },
-          { name: 'Compound', usdcAmount: 2_800_000_000, share: 23 },
-          { name: 'MakerDAO', usdcAmount: 2_100_000_000, share: 18 },
-          { name: 'Curve', usdcAmount: 1_500_000_000, share: 12 },
-          { name: 'Other', usdcAmount: 1_400_000_000, share: 12 },
-        ];
-        setProtocols(mock);
-        setTotalTvl(12_000_000_000);
-      }
+        if (json.history?.length > 0) setHistory(json.history);
+        if (json.protocols) setProtocols(json.protocols);
+        if (json.totalTvl) setTotalTvl(json.totalTvl);
+      } catch { /* keep empty */ }
     };
     fetchData();
   }, []);
 
+  const isDark = typeof document !== 'undefined'
+    ? document.documentElement.getAttribute('data-theme') === 'dark'
+    : true;
+
+  const protocolNames = protocols.map((p) => p.name);
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-[var(--primary)]" />
-          <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">DeFi TVL</span>
-        </div>
-        <span className="text-xs font-mono font-medium text-[var(--foreground)]">
-          {formatCurrency(totalTvl, 1)}
-        </span>
+      <div className="flex items-center gap-2 mb-2">
+        <Layers className="w-4 h-4 text-[var(--primary)]" />
+        <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">DeFi TVL</span>
+        {totalTvl > 0 && (
+          <span className="text-xs font-mono text-[var(--foreground)] ml-auto font-medium">
+            {formatCurrency(totalTvl, 1)}
+          </span>
+        )}
       </div>
-      <div className="h-3 rounded-full overflow-hidden flex mt-1">
-        {protocols.map((p, i) => (
-          <div
-            key={p.name}
-            style={{ width: `${p.share}%`, backgroundColor: COLORS[i] }}
-            className="h-full"
-          />
-        ))}
-      </div>
-      <div className="mt-2 space-y-1 flex-1 overflow-y-auto">
-        {protocols.map((p, i) => (
-          <div key={p.name} className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-              <span className="text-[var(--foreground)]">{p.name}</span>
-            </div>
-            <span className="font-mono text-[var(--muted)]">{formatCurrency(p.usdcAmount, 1)}</span>
-          </div>
-        ))}
+
+      <div className="flex-1 min-h-0">
+        {history.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={history}>
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 9, fill: 'var(--muted)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(m) => {
+                  const [, mo] = m.split('-');
+                  const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return months[parseInt(mo)];
+                }}
+              />
+              <YAxis
+                tick={{ fontSize: 9, fill: 'var(--muted)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => `$${(v / 1e9).toFixed(0)}B`}
+                width={45}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: isDark ? '#1E293B' : '#FFFFFF',
+                  border: `1px solid ${isDark ? '#334155' : '#E5E7EB'}`,
+                  borderRadius: 8,
+                  fontSize: 11,
+                }}
+                formatter={(val: number, name: string) => [formatCurrency(val, 1), name]}
+                labelFormatter={(m) => {
+                  const [y, mo] = m.split('-');
+                  const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return `${months[parseInt(mo)]} ${y}`;
+                }}
+              />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+              {protocolNames.map((name, i) => (
+                <Area
+                  key={name}
+                  type="monotone"
+                  dataKey={name}
+                  stackId="1"
+                  stroke={COLORS[i % COLORS.length]}
+                  fill={COLORS[i % COLORS.length]}
+                  fillOpacity={0.6}
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="text-sm text-[var(--muted)] text-center py-8">Loading...</div>
+        )}
       </div>
     </div>
   );
