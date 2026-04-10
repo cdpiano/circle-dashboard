@@ -21,12 +21,16 @@ export default function DefiDistribution() {
       try {
         const res = await fetch('/api/defi');
         const json = await res.json();
-        if (json.success && json.data?.protocols) {
-          const sorted = json.data.protocols
-            .sort((a: Protocol, b: Protocol) => b.usdcAmount - a.usdcAmount)
-            .slice(0, 5);
+        const prots = json.protocols || json.data?.protocols || [];
+        if (prots.length > 0) {
+          const mapped = prots.map((p: any) => ({
+            name: p.name || p.protocol,
+            usdcAmount: p.usdcAmount || 0,
+            share: p.share || 0,
+          }));
+          const sorted = mapped.sort((a: Protocol, b: Protocol) => b.usdcAmount - a.usdcAmount).slice(0, 5);
           setProtocols(sorted);
-          setTotalTvl(json.data.protocols.reduce((s: number, p: Protocol) => s + p.usdcAmount, 0));
+          setTotalTvl(mapped.reduce((s: number, p: Protocol) => s + p.usdcAmount, 0));
         }
       } catch {
         const mock: Protocol[] = [
