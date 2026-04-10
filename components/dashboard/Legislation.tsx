@@ -52,20 +52,20 @@ export default function Legislation() {
         <Scale className="w-4 h-4 text-[var(--primary)]" />
         <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Legislation</span>
       </div>
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 grid grid-cols-2 lg:grid-cols-4 gap-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-start gap-2 p-2 rounded-lg hover:bg-[var(--muted-light)] transition-colors">
             <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 mt-0.5 ${STATUS_COLORS[item.status]}`}>
               {STATUS_LABELS[item.status]}
             </span>
             <div className="min-w-0">
-              <div className="text-sm font-medium text-[var(--foreground)] leading-tight line-clamp-1">{item.title}</div>
+              <div className="text-sm font-medium text-[var(--foreground)] leading-tight line-clamp-2">{item.title}</div>
               <div className="text-xs text-[var(--muted)] mt-0.5">{item.region || (item as any).country} · {new Date(item.date).toLocaleDateString()}</div>
             </div>
           </div>
         ))}
         {items.length === 0 && (
-          <div className="text-sm text-[var(--muted)] text-center py-8">Loading...</div>
+          <div className="text-sm text-[var(--muted)] text-center py-8 col-span-4">Loading...</div>
         )}
       </div>
     </div>

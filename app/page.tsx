@@ -19,23 +19,26 @@ export default function Home() {
       <Header />
       <main className="py-2">
         <DashboardGrid>
-          {/* Row 1-2: Stock (3x2) + USDC Supply (2x1) + Legislation (1x2) */}
+          {/* Row 1-2: Stock (3x2) + USDC Supply (2x1) + MintBurn (1x1) */}
           <GridCard colSpan={3} rowSpan={2}>
             <StockPrice />
           </GridCard>
           <GridCard colSpan={2} rowSpan={1}>
             <UsdcCirculation />
           </GridCard>
-          <GridCard colSpan={1} rowSpan={2}>
-            <Legislation />
-          </GridCard>
-
-          {/* Row 2: MintBurn + Peg under USDC Supply */}
           <GridCard colSpan={1} rowSpan={1}>
             <MintBurn />
           </GridCard>
+
+          {/* Row 2: UsdcPeg + CPN + OnChain */}
           <GridCard colSpan={1} rowSpan={1}>
             <UsdcPeg />
+          </GridCard>
+          <GridCard colSpan={1} rowSpan={1}>
+            <CpnVolume />
+          </GridCard>
+          <GridCard colSpan={1} rowSpan={1}>
+            <OnchainVolume />
           </GridCard>
 
           {/* Row 3: Financials (3x1) + Competition (3x1) */}
@@ -54,12 +57,9 @@ export default function Home() {
             <ReserveVsRate />
           </GridCard>
 
-          {/* Row 5: CPN (1x1) + OnChain (1x1) */}
-          <GridCard colSpan={1} rowSpan={1}>
-            <CpnVolume />
-          </GridCard>
-          <GridCard colSpan={1} rowSpan={1}>
-            <OnchainVolume />
+          {/* Row 5: Legislation (6x1) full width */}
+          <GridCard colSpan={6} rowSpan={1}>
+            <Legislation />
           </GridCard>
         </DashboardGrid>
       </main>
