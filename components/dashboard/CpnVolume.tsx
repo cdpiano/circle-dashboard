@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Network } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { mockCpnVolumeData } from '@/lib/mock-data';
@@ -36,6 +36,7 @@ export default function CpnVolume() {
       <div className="flex-1 min-h-0 mt-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data.history}>
+            <XAxis dataKey="month" hide />
             <Tooltip
               contentStyle={{
                 background: 'var(--card)',
